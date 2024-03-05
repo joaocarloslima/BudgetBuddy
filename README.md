@@ -101,6 +101,8 @@ Apaga a categoria com o `id` informado no parâmetro de path.
 |--------|-----------|
 |204| Categoria apagada com sucesso
 |401| Não autorizado. Realize a autenticação em /login
+|404| Não existe categoria com o `id` informado
+
 
 ---
 
