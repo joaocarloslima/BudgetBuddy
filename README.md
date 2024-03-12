@@ -4,7 +4,7 @@ API Rest do projeto Budget Buddy - Controle de gastos pessoais
 
 ## Requisitos
 
-- [ ] CRUD de Categorias
+- [x] CRUD de Categorias
 - [ ] CRUD de Movimentações
 - [ ] CRUD de Usuários
 - [ ] Autenticação

@@ -1,12 +1,14 @@
 package br.com.fiap.budgetbuddy.controller;
 
-import java.util.ArrayList;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,8 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.budgetbuddy.model.Categoria;
+import br.com.fiap.budgetbuddy.repository.CategoriaRepository;
 
 @RestController
 @RequestMapping("categoria")
@@ -26,76 +30,68 @@ public class CategoriaController {
 
     Logger log = LoggerFactory.getLogger(getClass());
 
-    List<Categoria> repository = new ArrayList<>();
+    @Autowired // CDI - Context Dependency Injection
+    CategoriaRepository repository;
 
     @GetMapping
-    public List<Categoria> index(){
-        return repository;
+    public List<Categoria> index() {
+        return repository.findAll();
     }
 
     @PostMapping
-    @ResponseStatus(code = HttpStatus.CREATED)
-    public Categoria create(@RequestBody Categoria categoria){ //binding
+    @ResponseStatus(code = CREATED)
+    public Categoria create(@RequestBody Categoria categoria) { // binding
         log.info("cadastrando categoria " + categoria);
-        repository.add(categoria);
+        repository.save(categoria);
         return categoria;
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Categoria> show(@PathVariable Long id){
+    public ResponseEntity<Categoria> show(@PathVariable Long id) {
         log.info("buscar categoria por id {} ", id);
 
-        // for(Categoria categoria : repository){
-        //     if (categoria.id().equals(id))
-        //         return ResponseEntity.ok(categoria);
-        // }
+        return repository
+                .findById(id)
+                .map(ResponseEntity::ok) // converte para resposta http OK
+                .orElse(ResponseEntity.notFound().build());
 
-        var categoriaEncontrada = getCategoriaById(id);
+        // var categoriaEncontrada = repository.findById(id);
 
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
-        
-        return ResponseEntity.ok(categoriaEncontrada.get());
+        // if (categoriaEncontrada.isEmpty())
+        // return ResponseEntity.notFound().build();
+
+        // return ResponseEntity.ok(categoriaEncontrada.get());
     }
 
-    @DeleteMapping("{id}") 
-    public ResponseEntity<Object> destroy(@PathVariable Long id){
+    @DeleteMapping("{id}")
+    public ResponseEntity<Object> destroy(@PathVariable Long id) {
         log.info("Apagando categoria com id {} ", id);
 
-        var categoriaEncontrada = getCategoriaById(id);
+        verifyIfExists(id);
 
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
-
-        repository.remove(categoriaEncontrada.get());
+        repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoria){
+    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
         log.info("atualizando categoria com id {} para {}", id, categoria);
-         
-        var categoriaEncontrada = getCategoriaById(id);
 
-        if (categoriaEncontrada.isEmpty())
-            return ResponseEntity.notFound().build();
+        verifyIfExists(id);
 
-        var categoriaAntiga = categoriaEncontrada.get();
-        var categoriaNova = new Categoria(id, categoria.nome(), categoria.icone());
+        categoria.setId(id);
 
-        repository.remove(categoriaAntiga);
-        repository.add(categoriaNova);
-
-        return ResponseEntity.ok(categoriaNova);
+        repository.save(categoria);
+        return ResponseEntity.ok(categoria);
 
     }
 
-    private Optional<Categoria> getCategoriaById(Long id) {
-        var categoriaEncontrada = repository
-                                    .stream()
-                                    .filter( c -> c.id().equals(id))
-                                    .findFirst();
-        return categoriaEncontrada;
+    private void verifyIfExists(Long id) {
+        repository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Não existe categoria com o id informado"));
     }
+
+
 
 }
