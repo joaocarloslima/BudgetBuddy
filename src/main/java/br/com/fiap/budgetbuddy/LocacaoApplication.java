@@ -1,4 +1,4 @@
-	package br.com.fiap.budgetbuddy;
+package br.com.fiap.budgetbuddy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -8,16 +8,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @SpringBootApplication
 @Controller
-public class BudgetbuddyApplication {
+public class LocacaoApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BudgetbuddyApplication.class, args);
+		SpringApplication.run(LocacaoApplication.class, args);
 	}
 
 	@RequestMapping
 	@ResponseBody
 	public String home (){
-		return "Budget Buddy";
+		return "Locação Buddy";
 	}
 
 }
