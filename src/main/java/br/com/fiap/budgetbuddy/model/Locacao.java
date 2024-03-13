@@ -3,9 +3,6 @@ package br.com.fiap.budgetbuddy.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import org.hibernate.annotations.NotFound;
-
-import br.com.fiap.budgetbuddy.validation.TipoMovimentacao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +18,7 @@ import lombok.Data;
 
 @Data
 @Entity
-public class Movimentacao {
+public class Locacao {
 
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -33,9 +30,16 @@ public class Movimentacao {
     @Positive(message = "Valor inválido. Dever ser positivo")
     private BigDecimal valor;
 
-    private LocalDate data;
+    private LocalDate dataInicio;
 
-    @TipoMovimentacao
-    private String tipo;
-    
+    private LocalDate dataFim;
+
+    @NotEmpty(message = "Selecione um carro")
+    private List<Long> carros;
+
+    @Positive(message = "Quantidade inválida. Dever ser positivo")
+    private Integer quantidadeDias;
+
+    private String status;
+
 }
