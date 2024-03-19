@@ -2,12 +2,10 @@ package br.com.fiap.budgetbuddy.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,14 +21,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.budgetbuddy.model.Categoria;
 import br.com.fiap.budgetbuddy.repository.CategoriaRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("categoria")
+@Slf4j
 public class CategoriaController {
 
-    Logger log = LoggerFactory.getLogger(getClass());
-
-    @Autowired // CDI - Context Dependency Injection
+    @Autowired
     CategoriaRepository repository;
 
     @GetMapping
@@ -39,11 +37,10 @@ public class CategoriaController {
     }
 
     @PostMapping
-    @ResponseStatus(code = CREATED)
-    public Categoria create(@RequestBody Categoria categoria) { // binding
+    @ResponseStatus(CREATED)
+    public Categoria create(@RequestBody Categoria categoria) {
         log.info("cadastrando categoria " + categoria);
-        repository.save(categoria);
-        return categoria;
+        return repository.save(categoria);
     }
 
     @GetMapping("{id}")
@@ -52,37 +49,27 @@ public class CategoriaController {
 
         return repository
                 .findById(id)
-                .map(ResponseEntity::ok) // converte para resposta http OK
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
 
-        // var categoriaEncontrada = repository.findById(id);
-
-        // if (categoriaEncontrada.isEmpty())
-        // return ResponseEntity.notFound().build();
-
-        // return ResponseEntity.ok(categoriaEncontrada.get());
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Object> destroy(@PathVariable Long id) {
+    @ResponseStatus(NO_CONTENT)
+    public void destroy(@PathVariable Long id) {
         log.info("Apagando categoria com id {} ", id);
 
         verifyIfExists(id);
-
         repository.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
+    public Categoria atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
         log.info("atualizando categoria com id {} para {}", id, categoria);
 
         verifyIfExists(id);
-
         categoria.setId(id);
-
-        repository.save(categoria);
-        return ResponseEntity.ok(categoria);
+        return repository.save(categoria);
 
     }
 
@@ -91,7 +78,5 @@ public class CategoriaController {
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Não existe categoria com o id informado"));
     }
-
-
 
 }
