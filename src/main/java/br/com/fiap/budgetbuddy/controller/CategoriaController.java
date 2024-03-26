@@ -21,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.budgetbuddy.model.Categoria;
 import br.com.fiap.budgetbuddy.repository.CategoriaRepository;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -31,6 +32,7 @@ public class CategoriaController {
     @Autowired
     CategoriaRepository repository;
 
+
     @GetMapping
     public List<Categoria> index() {
         return repository.findAll();
@@ -38,7 +40,7 @@ public class CategoriaController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public Categoria create(@RequestBody Categoria categoria) {
+    public Categoria create(@RequestBody @Valid Categoria categoria) {
         log.info("cadastrando categoria " + categoria);
         return repository.save(categoria);
     }
